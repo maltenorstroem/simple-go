@@ -11,6 +11,24 @@ import (
 	"strconv"
 )
 
+// IANA konforme Links /
+// List of official link rels:
+// http://www.iana.org/assignments/link-relations/link-relations.xhtml
+type Link struct {
+	Rel string `json:"rel,omitempty"`
+	// HTTP Verb
+	Method string `json:"method,omitempty"`
+	// Absolute URI
+	Href string `json:"href,omitempty"`
+	// Der mime type des Links.
+	Type string `json:"type,omitempty"`
+}
+
+type EntityStruct struct {
+	Data  *Bike   `json:"data,omitempty"`
+	Links []*Link `json:"links,omitempty"`
+}
+
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
@@ -40,7 +58,10 @@ func BikeShow(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(bike); err != nil {
+	//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
+	entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice}}
+
+	if err := json.NewEncoder(w).Encode(entity); err != nil {
 		panic(err)
 	}
 }
