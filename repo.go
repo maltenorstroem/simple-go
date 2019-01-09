@@ -11,8 +11,9 @@ var bikes Bikes
 
 // some seed data
 func init() {
-	RepoCreateBike(Bike{Desc: "Haro Midway", Frame: "3 tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode: "CHF", Units: 459, Nanos: 0}})
-	RepoCreateBike(Bike{Desc: "Haro CK AM 2019", Frame: "3 tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode: "CHF", Units: 759, Nanos: 0}})
+	RepoCreateBike(Bike{Desc: "Haro Midway", Frame: "3 tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode: "CHF", Units: 459, Nanos: 50}, SoldOut: false})
+	RepoCreateBike(Bike{Desc: "Haro CK AM 2019", Frame: "3 tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode: "CHF", Units: 759, Nanos: 0}, SoldOut: true})
+	RepoCreateBike(Bike{Desc: "Haro Extreme 2019", Frame: "All tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode: "CHF", Units: 1250, Nanos: 0}, SoldOut: false})
 }
 
 func RepoFindBike(id int) Bike {

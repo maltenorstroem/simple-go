@@ -38,4 +38,16 @@ var routes = Routes{
 		"/bikes",
 		BikeCreate,
 	},
+	Route{
+		"BikeDelete",
+		"DELETE",
+		"/bikes/{bikeId}",
+		BikeDelete,
+	},
+	Route{
+		"BikeSoldOut",
+		"PUT",
+		"/bikes/{bikeId}:soldout",
+		BikeSetSoldOut,
+	},
 }

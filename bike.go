@@ -8,6 +8,7 @@ type Bike struct {
 	Frame         string      `json:"frame"`
 	Gearing       string      `json:"gearing"`
 	CustomerPrice money.Money `json:"customerPrice"`
+	SoldOut       bool        `json:"soldOut"`
 }
 
 type Bikes []Bike

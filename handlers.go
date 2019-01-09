@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // IANA konforme Links /
@@ -29,6 +30,11 @@ type EntityStruct struct {
 	Links []*Link `json:"links,omitempty"`
 }
 
+type CollectionStruct struct {
+	Data  []*EntityStruct `json:"data,omitempty"`
+	Links []*Link         `json:"links,omitempty"`
+}
+
 func Index(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 }
@@ -40,10 +46,17 @@ func BikeIndex(w http.ResponseWriter, r *http.Request) {
 	//	Bike{Desc: "Haro CK AM 2019", Frame: "3 tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode:"CHF", Units:759, Nanos:0}},
 	//}
 
+	var data []*EntityStruct
+
+	for i := 0; i < len(bikes); i++ {
+		data = append(data, &EntityStruct{Data: &Bike{Id: bikes[i].Id, Desc: bikes[i].Desc, Frame: bikes[i].Frame, Gearing: bikes[i].Gearing, CustomerPrice: bikes[i].CustomerPrice, SoldOut: bikes[i].SoldOut}})
+	}
+
+	collection := CollectionStruct{Data: data}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(bikes); err != nil {
+	if err := json.NewEncoder(w).Encode(collection); err != nil {
 		panic(err)
 	}
 
@@ -51,7 +64,8 @@ func BikeIndex(w http.ResponseWriter, r *http.Request) {
 
 func BikeShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	bikeId := vars["bikeId"]
+	params := strings.Split(vars["bikeId"], ":")
+	bikeId := params[0]
 	i, _ := strconv.Atoi(bikeId)
 	bike := RepoFindBike(i)
 
@@ -59,11 +73,46 @@ func BikeShow(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
-	entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice}}
+	entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
 
 	if err := json.NewEncoder(w).Encode(entity); err != nil {
 		panic(err)
 	}
+}
+
+func BikeDelete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	bikeId := vars["bikeId"]
+	i, _ := strconv.Atoi(bikeId)
+	err := RepoDestroyBike(i)
+
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusAccepted)
+
+	} else {
+		panic(err)
+	}
+}
+
+func BikeSetSoldOut(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	bikeId := vars["bikeId"]
+	i, _ := strconv.Atoi(bikeId)
+	bike := RepoFindBike(i)
+
+	bike.SoldOut = true
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusAccepted)
+
+	//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
+	entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
+
+	if err := json.NewEncoder(w).Encode(entity); err != nil {
+		panic(err)
+	}
+
 }
 
 func BikeCreate(w http.ResponseWriter, r *http.Request) {
