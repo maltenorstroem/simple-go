@@ -67,17 +67,22 @@ func BikeShow(w http.ResponseWriter, r *http.Request) {
 	params := strings.Split(vars["bikeId"], ":")
 	bikeId := params[0]
 	i, _ := strconv.Atoi(bikeId)
-	bike := RepoFindBike(i)
+	bike, err := RepoFindBike(i)
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+	if err == nil {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusOK)
 
-	//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
-	entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
-
-	if err := json.NewEncoder(w).Encode(entity); err != nil {
-		panic(err)
+		//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
+		entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
+		if err := json.NewEncoder(w).Encode(entity); err != nil {
+			panic(err)
+		}
+	} else {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.WriteHeader(http.StatusNotFound)
 	}
+
 }
 
 func BikeDelete(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +104,7 @@ func BikeSetSoldOut(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bikeId := vars["bikeId"]
 	i, _ := strconv.Atoi(bikeId)
-	bike := RepoFindBike(i)
+	bike, _ := RepoFindBike(i)
 
 	bike.SoldOut = true
 

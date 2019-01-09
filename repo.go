@@ -16,14 +16,14 @@ func init() {
 	RepoCreateBike(Bike{Desc: "Haro Extreme 2019", Frame: "All tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode: "CHF", Units: 1250, Nanos: 0}, SoldOut: false})
 }
 
-func RepoFindBike(id int) Bike {
+func RepoFindBike(id int) (Bike, error) {
 	for _, t := range bikes {
 		if t.Id == id {
-			return t
+			return t, nil
 		}
 	}
 	// return empty Bike if not found
-	return Bike{}
+	return Bike{}, fmt.Errorf("404 not found", id)
 }
 
 func RepoCreateBike(t Bike) Bike {
