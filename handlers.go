@@ -7,6 +7,7 @@ import (
 	"html"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -41,11 +42,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 func BikeIndex(w http.ResponseWriter, r *http.Request) {
 
-	//bikes := Bikes{
-	//	Bike{Desc: "Haro Midway", Frame: "3 tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode:"CHF", Units:459, Nanos:0}},
-	//	Bike{Desc: "Haro CK AM 2019", Frame: "3 tubes Crmo, Internal HT & mid BB - 20.5 & 21 TT", Gearing: "25/9", CustomerPrice: money.Money{CurrencyCode:"CHF", Units:759, Nanos:0}},
-	//}
-
 	var data []*EntityStruct
 
 	for i := 0; i < len(bikes); i++ {
@@ -57,7 +53,7 @@ func BikeIndex(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(collection); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 }
@@ -76,11 +72,12 @@ func BikeShow(w http.ResponseWriter, r *http.Request) {
 		//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
 		entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
 		if err := json.NewEncoder(w).Encode(entity); err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	} else {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusNotFound)
+		log.Println(err, bikeId)
 	}
 
 }
@@ -96,7 +93,8 @@ func BikeDelete(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusAccepted)
 
 	} else {
-		panic(err)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Print(err)
 	}
 }
 
@@ -115,7 +113,7 @@ func BikeSetSoldOut(w http.ResponseWriter, r *http.Request) {
 	entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
 
 	if err := json.NewEncoder(w).Encode(entity); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 }
@@ -124,16 +122,16 @@ func BikeCreate(w http.ResponseWriter, r *http.Request) {
 	var bike Bike
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if err := r.Body.Close(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	if err := json.Unmarshal(body, &bike); err != nil {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(422) // unprocessable entity
 		if err := json.NewEncoder(w).Encode(err); err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 
@@ -141,7 +139,7 @@ func BikeCreate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(t); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 }
