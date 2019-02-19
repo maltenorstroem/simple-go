@@ -22,7 +22,7 @@ DELETE:      /bikes/{id}
 
 ```
 {
-    "data":
+    "entity":
     {
         "id":1,
         "desc":"Haro Midway",
@@ -30,24 +30,28 @@ DELETE:      /bikes/{id}
         "gearing":"25/9",
         "customerPrice":{"currency_code":"CHF","units":459,"nanos":50},
         "soldOut":false
-    }
+    },
+    "meta": [],
+    "links": [],
+    "errors": []
 }
 
 ```
 
 ```
 {
-    "data":[
-        {"data":
+    "collection":[
+        {"entity":
             {"id":1,"desc":"Haro Midway","frame":"3 tubes Crmo, Internal HT \u0026 mid BB - 20.5 \u0026 21 TT","gearing":"25/9","customerPrice":{"currency_code":"CHF","units":459,"nanos":50},"soldOut":false}
         },
-        {"data":
+        {"entity":
             {"id":2,"desc":"Haro CK AM 2019","frame":"3 tubes Crmo, Internal HT \u0026 mid BB - 20.5 \u0026 21 TT","gearing":"25/9","customerPrice":{"currency_code":"CHF","units":759},"soldOut":true}
         },
-        {"data":
+        {"entity":
             {"id":3,"desc":"Haro Extreme 2019","frame":"All tubes Crmo, Internal HT \u0026 mid BB - 20.5 \u0026 21 TT","gearing":"25/9","customerPrice":{"currency_code":"CHF","units":1250},"soldOut":false}
         }
-    ]
+    ],
+    "links": []
 }
 
 ```
