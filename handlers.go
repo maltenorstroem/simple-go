@@ -26,14 +26,31 @@ type Link struct {
 	Type string `json:"type,omitempty"`
 }
 
+type Meta struct {
+	Field     string
+	Type      string
+	Min       int
+	Max       int
+	Mandatory bool
+}
+
+type Errors struct {
+	Field      string
+	Message    string
+	Code       string
+	DevMessage string
+}
+
 type EntityStruct struct {
-	Data  *Bike   `json:"data,omitempty"`
-	Links []*Link `json:"links,omitempty"`
+	Entity *Bike     `json:"entity,omitempty"`
+	Links  []*Link   `json:"links,omitempty"`
+	Meta   []*Meta   `json:"meta,omitempty"`
+	Errors []*Errors `json:"errors,omitempty"`
 }
 
 type CollectionStruct struct {
-	Data  []*EntityStruct `json:"data,omitempty"`
-	Links []*Link         `json:"links,omitempty"`
+	Collection []*EntityStruct `json:"collection,omitempty"`
+	Links      []*Link         `json:"links,omitempty"`
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
@@ -45,10 +62,10 @@ func BikeIndex(w http.ResponseWriter, r *http.Request) {
 	var data []*EntityStruct
 
 	for i := 0; i < len(bikes); i++ {
-		data = append(data, &EntityStruct{Data: &Bike{Id: bikes[i].Id, Desc: bikes[i].Desc, Frame: bikes[i].Frame, Gearing: bikes[i].Gearing, CustomerPrice: bikes[i].CustomerPrice, SoldOut: bikes[i].SoldOut}})
+		data = append(data, &EntityStruct{Entity: &Bike{Id: bikes[i].Id, Desc: bikes[i].Desc, Frame: bikes[i].Frame, Gearing: bikes[i].Gearing, CustomerPrice: bikes[i].CustomerPrice, SoldOut: bikes[i].SoldOut}})
 	}
 
-	collection := CollectionStruct{Data: data}
+	collection := CollectionStruct{Collection: data}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
@@ -69,8 +86,17 @@ func BikeShow(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.WriteHeader(http.StatusOK)
 
+		// simple hateoas information
+		hateoas := Link{Rel: "self", Type: "vnd/application.com.simplesrv.bikes", Method: "GET", Href: "http://localhost:8888/bikes/" + strconv.Itoa(bike.Id)}
+		var links []*Link
+		links = append(links, &hateoas)
+
+		// simple meta information
+		metaDesc := Meta{Field: "desc", Type: "string", Min: 4, Max: 120, Mandatory: true}
+		var meta []*Meta
+		meta = append(meta, &metaDesc)
 		//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
-		entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
+		entity := EntityStruct{Entity: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}, Meta: meta, Links: links}
 		if err := json.NewEncoder(w).Encode(entity); err != nil {
 			log.Fatal(err)
 		}
@@ -110,7 +136,7 @@ func BikeSetSoldOut(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 
 	//TODO Mapping funcs definieren: Data: MapTaskToProtoTask(&item), Links: GenerateEntityHateoas(item.Id.String()).Links}
-	entity := EntityStruct{Data: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
+	entity := EntityStruct{Entity: &Bike{Id: bike.Id, Desc: bike.Desc, Frame: bike.Frame, Gearing: bike.Gearing, CustomerPrice: bike.CustomerPrice, SoldOut: bike.SoldOut}}
 
 	if err := json.NewEncoder(w).Encode(entity); err != nil {
 		log.Fatal(err)
